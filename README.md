@@ -7,10 +7,10 @@ Every assignment includes at least requirements, implementation details, code an
 Control an RGB LED using 3 potentiometers, writing the values with Arduino.
 
 <details>
-<summary>Images</summary>
-- ![Image 1](homework1/1.jpg)
-- ![Image 2](homework1/2.jpg)
-- ![Image 3](homework1/3.jpg)
+	<summary>Images</summary>
+	<img src="homework1/1.jpg" width="350"> <br>
+	<img src="homework1/2.jpg" width="350"> <br>
+    <img src="homework1/3.jpg" width="350"> <br>
 </details>
 
 **Code**: [homework1](homework1/homework1.ino)
