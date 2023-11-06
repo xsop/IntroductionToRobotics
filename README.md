@@ -48,7 +48,9 @@ It doesn't stack the requests, it goes to the first requested floor and after it
 
 ## Homework 3
 
-
+Code enables a "cursor" to move around a seven segment display with a joystick and toggle the segments with it's button.\
+Highlighted segment is blinking whether it is active or not.\
+If you hold the joystick button, all the segments will be reset.
 
 <details>
 	<summary>Components used:</summary>
