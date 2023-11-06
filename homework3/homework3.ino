@@ -100,7 +100,7 @@ void loop(){
 
     if (joystickMoved == false) {
         direction = getDirection();
-        if (direction != -1) {
+        if (direction != noDirection) {
             moveTo(direction);
         }
     } 

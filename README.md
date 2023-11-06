@@ -21,7 +21,7 @@ Control an RGB LED using 3 potentiometers, writing the values with Arduino.
 ## Homework 2
 Simple elevator system with three floors, scalable to any number of floors.\
 The elevator has a button and led for each floor.\
-It doesn't stack the requests, it goes to the first requested floor and after it finishes it goes to the next one.\
+It doesn't stack the requests, it goes to the first requested floor and after it finishes it goes to the next one.
 
 
 <details>
@@ -33,7 +33,7 @@ It doesn't stack the requests, it goes to the first requested floor and after it
 		<li>3x Push Button</li>
 		<li>4x LED</li>
 		<li>5x 220 OHM Resistor</li>
-		<li>many wires</li>
+		<li>wires</li>
 	</ul>
 </details>
 
@@ -45,3 +45,28 @@ It doesn't stack the requests, it goes to the first requested floor and after it
 **Code**: [homework2](homework2/homework2.ino)
 
 **Video**: [Link](https://www.youtube.com/watch?v=1sG_I989Z9I)
+
+## Homework 3
+
+
+
+<details>
+	<summary>Components used:</summary>
+	<ul>
+		<li>Arduino Uno</li>
+		<li>Breadboard</li>
+		<li>8x 220 OHM Resistor</li>
+		<li>7 Segment Display</li>
+		<li>Joystick</li>
+		<li>wires</li>
+	</ul>
+</details>
+
+<details>
+	<summary>Image</summary>
+	<img src="homework3/1.jpg" width="350"> <br>
+</details>
+
+**Code**: [homework3](homework3/homework3.ino)
+
+**Video**: [Link](https://www.youtube.com/watch?v=sOArNZ-hR0M)
