@@ -96,8 +96,8 @@ The third button is for adding laps / cycling laps.
 
 <details>
 	<summary>Images</summary>
-	<img src="homework4/1.jpg" width="350"> <br>
-	<img src="homework4/2.jpg" width="350"> <br>
+	<img src="homework4/1.jpeg" width="350"> <br>
+	<img src="homework4/2.jpeg" width="350"> <br>
 </details>
 
 **Code**: [homework4](homework4/homework4.ino)
