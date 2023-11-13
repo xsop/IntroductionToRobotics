@@ -1,21 +1,19 @@
-const int latchPin = 11;
-const int clockPin = 10;
-const int dataPin = 12;
+/* 
+Arduino stopwatch with lap memory
+3 buttons representing:
+    - start/pause
+    - reset
+    - lap
+It uses interrupts for the start/pause and lap buttons.
+The reset button is not interrupt because arduino uno has only 2 interrupt pins.
+It uses a 4 digit 7 segment display to display the time.
+*/
 
-const int startPauseButtonPin = 2;
-const int resetButtonPin = 8;
-const int lapButtonPin = 3;
-
-const int segD1 = 4;
-const int segD2 = 5;
-const int segD3 = 6;
-const int segD4 = 7;
-
-int displayDigits[] = { segD1, segD2, segD3, segD4 };
-const int displayCount = 4;
+const int commonAnode = 0; // 1 for common anode, 0 for common cathode
 
 const int encodingsNumber = 10;
 
+byte lowDisplayValue = LOW;
 byte byteEncodings[encodingsNumber] = {
 	//A B C D E F G DP
 	B11111100,	// 0
@@ -29,38 +27,60 @@ byte byteEncodings[encodingsNumber] = {
 	B11111110,	// 8
 	B11110110,	// 9
 };
+byte decimalByteEncoding = B00000001;
+byte ghostingFixByteEncoding = B00000000;
+
+const int latchPin = 11;
+const int clockPin = 10;
+const int dataPin = 12;
+
+const int startPauseButtonPin = 2; // interrupt pin
+const int resetButtonPin = 8;
+const int lapButtonPin = 3; // interrupt pin
+
+const int segD1 = 4;
+const int segD2 = 5;
+const int segD3 = 6;
+const int segD4 = 7;
+
+int displayDigits[] = { segD1, segD2, segD3, segD4 };
+const int displayCount = 4;
+
 unsigned long lastIncrement = 0;
-unsigned long delayCount = 50;
-unsigned long number = 0;
+const unsigned long delayCount = 50;
+unsigned long lastDebounceTime = 0;
+const unsigned long debounceDelay = 200;
+
+int timerMode = 0;
 
 bool setTimer = false;
 bool setPauseTimer = false;
 unsigned long startTimer = 0;
 unsigned long pauseTimer = 0;
 
-int timerMode = 0;
-
-unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay = 200;
 byte lastStartPauseButtonState;
 byte lastLapButtonState;
 
+// calculated decimal point location
 const unsigned int decimalPointMilliseconds = 2;
 const unsigned int millisecondsToSecondsFactor = pow(10, decimalPointMilliseconds);
 
+// timer modes, constants for better readability
+// using just the number is also possible
 const unsigned int idleMode = 0;
 const unsigned int startMode = 1;
 const unsigned int pauseMode = 2;
 const unsigned int lapCycleMode = 3;
 
-// outside index range is intended, so when reset is pressed it shows 000.0 (as homework requires)
-// it is outside so that it won't cycle back to 000.0 through normal lap time cycling
-// I think that this shouldn't be intended but it's what the homework asks for
-int index = displayCount;
-int lapNumber = 0;
-int savedLaps[displayCount];
-
+// outside index range is intended, so when reset is pressed it shows 000.0
 const unsigned int lapMemorySize = 4;
+int lapMemoryIndex = displayCount;
+int lapNumber = 0;
+int savedLaps[lapMemorySize];
+
+int currentNumber;
+int displayDigit;
+int lastDigit;
 
 void setup() {
     pinMode(startPauseButtonPin, INPUT_PULLUP);
@@ -71,18 +91,23 @@ void setup() {
 	pinMode(clockPin, OUTPUT);
 	pinMode(dataPin, OUTPUT);
 
+    if(commonAnode) {
+        invertByteEncodings();
+    }
+
 	for (int i = 0; i < displayCount; i++) {
 		pinMode(displayDigits[i], OUTPUT);
-		digitalWrite(displayDigits[i], LOW);
+		digitalWrite(displayDigits[i], lowDisplayValue);
 	}
 
-    attachInterrupt(digitalPinToInterrupt(startPauseButtonPin), startPauseButtonPressed, FALLING);
-    attachInterrupt(digitalPinToInterrupt(lapButtonPin), lapButtonPressed, FALLING);
+    attachInterrupt(digitalPinToInterrupt(startPauseButtonPin), startPauseButtonInterruptHandler, FALLING);
+    attachInterrupt(digitalPinToInterrupt(lapButtonPin), lapButtonInterruptHandler, FALLING);
 }
 
 void loop() {
     getLastInterruptButtonsState();
-    checkResetButton();
+    checkResetButton(); // non interrupt button because arduino uno has only 2 interrupt pins
+    // also it's not needed to have extremely fast response time
 
     switch(timerMode) {
         case startMode:
@@ -100,9 +125,78 @@ void loop() {
     }
 }
 
+byte invertByte(byte inputByte) {
+    return ~inputByte;
+}
+
+void invertByteEncodings() {
+    lowDisplayValue = invertByte(lowDisplayValue);
+    for (int i = 0; i < encodingsNumber; i++) {
+        byteEncodings[i] = invertByte(byteEncodings[i]);
+    }
+
+    decimalByteEncoding = invertByte(decimalByteEncoding);
+    ghostingFixByteEncoding = invertByte(ghostingFixByteEncoding);
+}
+
 void getLastInterruptButtonsState() {
     lastStartPauseButtonState = digitalRead(startPauseButtonPin);
     lastLapButtonState = digitalRead(lapButtonPin);
+}
+
+void startPauseButtonInterruptHandler() {
+    unsigned long currentMicros = micros();
+
+    if (currentMicros - lastDebounceTime > debounceDelay * 1000 && lastStartPauseButtonState != digitalRead(startPauseButtonPin)) {
+        lastDebounceTime = currentMicros;
+
+        if (timerMode == idleMode || timerMode == pauseMode) {
+            timerMode = startMode;
+        } else if (timerMode == lapCycleMode) {
+            goToZero();
+            timerMode = startMode;
+        } else if (timerMode == startMode) {
+            timerMode = pauseMode;
+        }
+    }
+}
+
+void lapButtonInterruptHandler() {
+    unsigned long currentMicros = micros();
+
+    if (currentMicros - lastDebounceTime > debounceDelay * 1000 && lastLapButtonState != digitalRead(lapButtonPin)) {
+        lastDebounceTime = currentMicros;
+
+        if (timerMode == startMode) {
+            pushLap((micros() / 1000 - startTimer) / millisecondsToSecondsFactor);
+        }
+        else if (timerMode == lapCycleMode) {
+            if(lapMemoryIndex <= lapMemorySize - lapNumber || lapMemoryIndex <= 0) { 
+                lapMemoryIndex = lapMemorySize - 1; 
+            }
+            else {
+                lapMemoryIndex--;
+            }
+        }
+    }
+}
+
+void checkResetButton() {
+    static bool resetButtonPressed = false;
+    if(!resetButtonPressed && millis() - lastDebounceTime > debounceDelay && digitalRead(resetButtonPin) == LOW) {
+        if(timerMode == lapCycleMode) {
+            timerMode = idleMode;
+        }
+        else if(timerMode == pauseMode){
+            timerMode = lapCycleMode;
+        }
+        
+        lastDebounceTime = millis();
+        resetButtonPressed = true;
+    }
+    else if (digitalRead(resetButtonPin) == HIGH) {
+        resetButtonPressed = false;
+    }
 }
 
 void pushLap(int lap) {
@@ -129,7 +223,7 @@ void resetLaps() {
 
 void startModeTimer() {
     if(setPauseTimer){
-        startTimer += millis() - pauseTimer;
+        startTimer += millis() - pauseTimer; // adding the time that passed while paused
         setPauseTimer = false;
     }
 
@@ -150,58 +244,28 @@ void pauseModeTimer() {
 }
 
 void lapCycleModeTimer() {
-    if(index == displayCount) {
+    if(lapMemoryIndex == displayCount) {
         writeNumber(0);
     }
     else {
-        writeNumber(savedLaps[index]);
+        writeNumber(savedLaps[lapMemoryIndex]);
     }
 }
 
 void idleModeTimer() {
+    goToZero();
+    resetLaps();
+}
+
+void goToZero(){
     setPauseTimer = false;
     setTimer = false;
-    index = displayCount;
-    resetLaps();
+    lapMemoryIndex = displayCount;
     writeNumber(0);
 }
 
-void startPauseButtonPressed() {
-    unsigned long currentMillis = millis();
-
-    if (currentMillis - lastDebounceTime > debounceDelay && lastStartPauseButtonState != digitalRead(startPauseButtonPin)) {
-        lastDebounceTime = currentMillis;
-
-        if (timerMode == idleMode || timerMode == pauseMode) {
-            timerMode = startMode;
-        } else if (timerMode == startMode) {
-            timerMode = pauseMode;
-        }
-    }
-}
-
-void lapButtonPressed() {
-    unsigned long currentMillis = millis();
-
-    if (currentMillis - lastDebounceTime > debounceDelay && lastLapButtonState != digitalRead(lapButtonPin)) {
-        lastDebounceTime = currentMillis;
-
-        if (timerMode == startMode) {
-            pushLap((millis() - startTimer) / millisecondsToSecondsFactor);
-        }
-        else if (timerMode == lapCycleMode) {
-            if(index <= lapMemorySize - lapNumber || index <= 0) { 
-                index = lapMemorySize - 1; 
-            }
-            else {
-                index--;
-            }
-        }
-    }
-}
-
 void writeDigit(int digit, bool decimal = false) {
-    digit += decimal * B00000001;
+    digit += decimal * decimalByteEncoding; // adding a decimal point if needed
 	digitalWrite(latchPin, LOW);
 	shiftOut(dataPin, clockPin, MSBFIRST, digit);
 	digitalWrite(latchPin, HIGH);
@@ -210,20 +274,12 @@ void writeDigit(int digit, bool decimal = false) {
 void writeDigitToDisplayNoGhosting(int displayDigit, int digit, bool decimal = false) {
     activateDisplay(displayDigit);
     writeDigit(byteEncodings[digit], decimal);
-    writeDigit(B00000000);
-}
-
-void activateDisplay(int displayNumber) {
-	for (int i = 0; i < displayCount; i++) {
-		digitalWrite(displayDigits[i], HIGH);
-	}
-	digitalWrite(displayDigits[displayNumber], LOW);
+    writeDigit(ghostingFixByteEncoding);
 }
 
 void writeNumber(int number) {
-	int currentNumber = number;
-	int displayDigit = 3;
-	int lastDigit = 0;
+	currentNumber = number;
+	displayDigit = displayCount - 1; // get the last digit from the display
 
     while(displayDigit >= 0) {
         if(currentNumber != 0) {
@@ -231,27 +287,16 @@ void writeNumber(int number) {
             currentNumber /= 10;
         }
         else {
-            lastDigit = 0;
+            lastDigit = 0; // if there are no more digits, print 0 to complete all the displays
         }
         writeDigitToDisplayNoGhosting(displayDigit, lastDigit, displayDigit == decimalPointMilliseconds);
         displayDigit--;
     }
 }
 
-void checkResetButton() {
-    static bool resetButtonPressed = false;
-    if(!resetButtonPressed && millis() - lastDebounceTime > debounceDelay && digitalRead(resetButtonPin) == LOW) {
-        if(timerMode == lapCycleMode) {
-            timerMode = idleMode;
-        }
-        else if(timerMode == pauseMode){
-            timerMode = lapCycleMode;
-        }
-        
-        lastDebounceTime = millis();
-        resetButtonPressed = true;
-    }
-    else if (digitalRead(resetButtonPin) == HIGH) {
-        resetButtonPressed = false;
-    }
+void activateDisplay(int displayNumber) {
+	for (int i = 0; i < displayCount; i++) {
+		digitalWrite(displayDigits[i], !lowDisplayValue);
+	}
+	digitalWrite(displayDigits[displayNumber], lowDisplayValue);
 }

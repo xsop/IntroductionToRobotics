@@ -72,3 +72,37 @@ If you hold the joystick button, all the segments will be reset.
 **Code**: [homework3](homework3/homework3.ino)
 
 **Video**: [Link](https://www.youtube.com/watch?v=sOArNZ-hR0M)
+
+## Homework 4
+
+Stopwatch with a 4x 7 Segment Display and 3 buttons.\
+The first button is for starting and stopping the stopwatch.\
+The second button is for entering the lap cycle mode / resetting the stopwatch.\
+The third button is for adding laps / cycling laps.
+
+<details>
+	<summary>Components used:</summary>
+	<ul>
+		<li>Arduino Uno</li>
+		<li>Medium Breadboard</li>
+		<li>Small Breadboard (for buttons)</li>
+		<li>3x Buttons</li>
+		<li>74HC595 Shift Register</li>
+		<li>8x 220 OHM Resistor</li>
+		<li>4x7 Segment Display</li>
+		<li>wires</li>
+	</ul>
+</details>
+
+<details>
+	<summary>Images</summary>
+	<img src="homework4/1.jpg" width="350"> <br>
+	<img src="homework4/2.jpg" width="350"> <br>
+</details>
+
+**Code**: [homework4](homework4/homework4.ino)
+
+**Video**: [Link](https://www.youtube.com/watch?v=sHAmKSQOK5w)
+
+
+
