@@ -104,5 +104,32 @@ The third button is for adding laps / cycling laps.
 
 **Video**: [Link](https://www.youtube.com/watch?v=sHAmKSQOK5w)
 
+## Homework 4
 
+Stopwatch with a 4x 7 Segment Display and 3 buttons.\
+The first button is for starting and stopping the stopwatch.\
+The second button is for entering the lap cycle mode / resetting the stopwatch.\
+The third button is for adding laps / cycling laps.
 
+<details>
+	<summary>Components used:</summary>
+	<ul>
+		<li>Arduino Uno</li>
+		<li>Breadboard</li>
+		<li>3x 220 Ohm Resistors</li>
+		<li>10k Ohm Resistor</li>
+		<li>Ultrasonic Sensor</li>
+		<li>Light-Dependent Resistor</li>
+		<li>RGB LED</li>
+		<li>wires</li>
+	</ul>
+</details>
+
+<details>
+	<summary>Image</summary>
+	<img src="homework5/1.jpg" width="350"> <br>
+</details>
+
+**Code**: [homework5](homework5/homework5.ino)
+
+**Video**: [Link](https://www.youtube.com/watch?v=OUmP0h9LdzE)
