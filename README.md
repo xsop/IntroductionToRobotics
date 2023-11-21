@@ -104,12 +104,11 @@ The third button is for adding laps / cycling laps.
 
 **Video**: [Link](https://www.youtube.com/watch?v=sHAmKSQOK5w)
 
-## Homework 4
+## Homework 5
 
-Stopwatch with a 4x 7 Segment Display and 3 buttons.\
-The first button is for starting and stopping the stopwatch.\
-The second button is for entering the lap cycle mode / resetting the stopwatch.\
-The third button is for adding laps / cycling laps.
+Smart Environment Monitor and Logger\
+It logs and controls a RGB LED based on the environment's light intensity and distance to objects.\
+It has a menu system that can be navigated through the serial monitor.
 
 <details>
 	<summary>Components used:</summary>
