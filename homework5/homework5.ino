@@ -162,18 +162,18 @@ void verifyEEPROM() {
     // useful to mitigate the risk of the EEPROM passing values in the wrong range
     // expecially useful for setting the sampling interval since a very small sampling interval
     // could cause the Arduino to corrupt the EEPROM by writing too often
-    if(intEEPROMGet(samplingIntervalAddress) < minSamplingInterval * 1000 
-    || intEEPROMGet(samplingIntervalAddress) > maxSamplingInterval * 1000){
+    if(intEEPROMGet(samplingIntervalAddress) <= minSamplingInterval * 1000 
+    || intEEPROMGet(samplingIntervalAddress) >= maxSamplingInterval * 1000){
         EEPROM.put(samplingIntervalAddress, maxSamplingInterval * 1000);
     }
 
-    if(intEEPROMGet(distanceAlertThresholdAddress) < minDistanceAlertThreshold
-    || intEEPROMGet(distanceAlertThresholdAddress) > maxDistanceAlertThreshold){
+    if(intEEPROMGet(distanceAlertThresholdAddress) <= minDistanceAlertThreshold
+    || intEEPROMGet(distanceAlertThresholdAddress) >= maxDistanceAlertThreshold){
         EEPROM.put(distanceAlertThresholdAddress, maxDistanceAlertThreshold);
     }
 
-    if(intEEPROMGet(ldrAlertThresholdAddress) < minLDRAlertThreshold 
-    || intEEPROMGet(ldrAlertThresholdAddress) > maxLDRAlertThreshold){
+    if(intEEPROMGet(ldrAlertThresholdAddress) <= minLDRAlertThreshold 
+    || intEEPROMGet(ldrAlertThresholdAddress) >= maxLDRAlertThreshold){
         EEPROM.put(ldrAlertThresholdAddress, maxLDRAlertThreshold);
     }
 
