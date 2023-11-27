@@ -132,3 +132,38 @@ It has a menu system that can be navigated through the serial monitor.
 **Code**: [homework5](homework5/homework5.ino)
 
 **Video**: [Link](https://www.youtube.com/watch?v=OUmP0h9LdzE)
+
+## Homework 6
+
+Bomberman game on a 8x8 LED Matrix.\
+Very simplified version, you have to break all the blocks to win.\
+The control is done through a joystick, clicking it will place a bomb.\
+The player can move around and place bombs.\
+The bombs explode after a certain amount of time and destroy the blocks / walls around them.\
+You die by touching the explosion.
+
+
+<details>
+	<summary>Components used:</summary>
+	<ul>
+		<li>Arduino Uno</li>
+		<li>Breadboard</li>
+		<li>8x8 LED Matrix</li>
+		<li>Joystick</li>
+		<li>MAX7219 Driver</li>
+		<li>10k Ohm Resistor</li>
+		<li>C104 Capacitor</li>
+		<li>C4 10μF Capacitor</li>
+		<li>wires</li>
+	</ul>
+</details>
+
+<details>
+	<summary>Image</summary>
+	<img src="homework6/1.jpg" width="350"> <br>
+</details>
+
+**Code**: [homework6](homework6/homework6.ino)
+
+**Video**: [Link](https://www.youtube.com/watch?v=tWVN4f-HtDU)\
+(the matrix is too bright for my camera so the whole video is underexposed, but the matrix is clear)

@@ -5,17 +5,21 @@ Entity::Entity() {
 }
 
 void Entity::blink() {
-    if(millis() - lastBlink > blinkInterval) {
-        lastBlink = millis();
-        
-        matrix.setLed(x, y, visible, false);
-        visible = !visible;
+    if(areEntitiesOnSameSpot()) {
+        // blink faster if player is on top of bomb
+        // by having the same blink interval on both
+        // the bomb and the player will blink at the same time
+        // => not needed to make one entity invisible
+        blinkEntity(lastBlink, collisionBlinkInterval, visible, x, y);
+    }
+    else {
+        blinkEntity(lastBlink, blinkInterval, visible, x, y);
     }
 }
 
 Player::Player() {
     visible = true;
-    blinkInterval = 500;
+    blinkInterval = playerBlinkInterval;
 }
 
 void Player::movePlayer(byte x, byte y) {
@@ -25,7 +29,7 @@ void Player::movePlayer(byte x, byte y) {
     if(isOutOfBounds(x, y)) {
         return;
     }
-    if(gameMap.isWall(x, y)) {
+    if(gameMap.isObstacle(x, y)) {
         return;
     }
     matrix.setLed(this->x, this->y, matrix.getLed(this->x, this->y), true);
@@ -38,17 +42,19 @@ void Player::movePlayer(byte x, byte y) {
     lastBlink = millis(); // reset blink timer for consistent first blink
 }
 
-int Player::isOutOfBounds(int x, int y) const {
-    int matrixSize = matrix.getMatrixSize();
-    if(x < 0 || x > matrixSize - 1 || y < 0 || y > matrixSize - 1) {
-        return 1;
+bool Player::isOutOfBounds(byte x, byte y) const {
+    //needs to be modified to work with a fov type of map
+    //this only checks if the player is within the matrix
+    int matrixSize = matrix.getMatrixSize() - 1;
+    if(x < 0 || x > matrixSize || y < 0 || y > matrixSize) {
+        return true;
     }
-    return 0;
+    return false;
 }
 
 Bomb::Bomb() {
     visible = true;
-    blinkInterval = 200;
+    blinkInterval = bombBlinkInterval;
     timePlaced = millis();
     x = player.getX();
     y = player.getY();
@@ -63,7 +69,7 @@ Bomb& Bomb::operator=(const Bomb& other) {
     return *this;
 }
 
-bool Bomb::explode() {
+bool Bomb::exploded() {
     if(explosionStart == 0){
         for(int i = 0; i < explosionRadius; i++) {
             matrix.setLed(x + i, y, true, false);
@@ -72,27 +78,20 @@ bool Bomb::explode() {
             matrix.setLed(x, y - i, true, false);
             explosionStart = millis();
         }
-        explosionRadius -= 1; // too lazy to do math
-        if((player.getX() <= x + explosionRadius && player.getX() >= x - explosionRadius && player.getY() == y) ||
-            (player.getY() <= y + explosionRadius && player.getY() >= y - explosionRadius && player.getX() == x)){
-            //reset game
-            //todo beautify and remove magic numbers
-            //make the whole matrix red
-            for(int i = 0; i < matrix.getMatrixSize(); i++) {
-                for(int j = 0; j < matrix.getMatrixSize(); j++) {
-                    matrix.setLed(i, j, true, false);
-                }
-            }
-            delay(1000);
-            player.movePlayer(0, 0);
-            matrix.setupMatrix();
-            randomSeed(analogRead(5));
-            gameMap.drawWalls();
+        // if player is on the same row and within the explosion radius
+        if((player.getX() <= x + (explosionRadius - 1) && 
+            player.getX() >= x - (explosionRadius - 1) && 
+            player.getY() == y) ||
+        // if player is on the same column and within the explosion radius
+            (player.getY() <= y + (explosionRadius - 1) &&
+             player.getY() >= y - (explosionRadius - 1) && 
+             player.getX() == x)) {
+
+            startGame();
             
         }
     }
     else if(millis() - explosionStart > animationDuration) {
-        explosionRadius += 1;
         for(int i = 0; i < explosionRadius; i++) {
             matrix.setLed(x + i, y, false, true);
             matrix.setLed(x - i, y, false, true);
@@ -103,4 +102,13 @@ bool Bomb::explode() {
         return 1;
     }
     return 0;
+}
+
+void blinkEntity(unsigned long &lastBlink, unsigned long blinkInterval, bool &visible, byte x, byte y) {
+    if(millis() - lastBlink > blinkInterval) {
+        lastBlink = millis();
+        
+        matrix.setLed(x, y, visible, false);
+        visible = !visible;
+    }
 }

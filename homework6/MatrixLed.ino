@@ -1,7 +1,7 @@
 #include "MatrixLed.h"
 
 Matrix::Matrix(){
-    
+
 }
 
 void Matrix::setupMatrix(){
@@ -9,12 +9,16 @@ void Matrix::setupMatrix(){
     lc.shutdown(0, false); // turn off power saving, enables display
     lc.setIntensity(0, matrixBrightness); // sets brightness (0~15 possible values)
     lc.clearDisplay(0);// clear screen
+    resetMemory();
+}
 
+void Matrix::resetMemory(){
     for(int i = 0; i < matrixSize; i++){
         for(int j = 0; j < matrixSize; j++){
             memoryMatrix[i][j] = 0;
         }
     }
+    memoryCounter = 0;
 }
 
 void Matrix::setLed(byte row, byte col, bool state, bool updateMatrix = 1){
@@ -22,8 +26,13 @@ void Matrix::setLed(byte row, byte col, bool state, bool updateMatrix = 1){
         return;
     }
     lc.setLed(0, row, col, state);
-    if(updateMatrix){
+    if(updateMatrix && memoryMatrix[row][col] != state){
         memoryMatrix[row][col] = state;
+        memoryCounter += state ? 1 : -1;
+        if(memoryCounter <= 0){
+            startGame();
+
+        }
     }
 }
 

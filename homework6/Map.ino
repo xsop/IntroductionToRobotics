@@ -7,7 +7,7 @@ GameMap::GameMap() {
 void GameMap::update() {
     if(bomb != nullptr) {
         if(bomb->timerRanOut()) {
-            if(bomb->explode()){
+            if(bomb->exploded()){
                 delete bomb;
                 bomb = nullptr;
                 return;
@@ -17,24 +17,42 @@ void GameMap::update() {
     }
 }
 
-void GameMap::drawWalls() {
+void GameMap::generate() {
     int wallCount = (matrixSize * matrixSize) * wallPercentage / 100;
-    int wallX = 0;
-    int wallY = 0;
+    if(wallCount < 1) {
+        wallCount = 1;
+    }
+    byte wallX = 0;
+    byte wallY = 0;
     for(int i = 0; i < wallCount; i++) {
         wallX = random(0, matrixSize);
         wallY = random(0, matrixSize);
-        if(abs(wallX - player.getX()) < 2 && abs(wallY - player.getY()) < 2) {
+        if(abs(wallX - player.getX()) < explosionRadius && abs(wallY - player.getY()) < explosionRadius) {
             continue;
         }
         matrix.setLed(wallX, wallY, true);
     }
 }
 
-bool GameMap::isWall(int x, int y) const {
+void GameMap::placeBomb() {
+    if(bomb != nullptr) {
+        return;
+    }
+    bomb = new Bomb();
+}
+
+bool GameMap::isObstacle(int x, int y) const {
+    // not necessary to have a specific function for this
+    // but makes it more modular and easier to modify later
     return matrix.getLed(x, y);
 }
 
-void GameMap::placeBomb() {
-    bomb = new Bomb();
+bool areEntitiesOnSameSpot(){
+    if (bomb == nullptr) {
+        return false;
+    }
+    if (player.getX() == bomb->getX() && player.getY() == bomb->getY()) {
+        return true;
+    }
+    return false;
 }

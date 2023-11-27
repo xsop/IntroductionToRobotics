@@ -10,11 +10,11 @@ public:
     byte getY() const { return y; }
 
 protected:
-    byte x = 0;
-    byte y = 0;
+    byte x = playerStartX;
+    byte y = playerStartY;
 
     bool visible = true;
-    int blinkInterval;
+    unsigned long blinkInterval;
     unsigned long lastBlink = 0;
 };
 
@@ -22,20 +22,18 @@ class Player : public Entity {
 public:
     Player();
     void movePlayer(byte x, byte y);
-    int isOutOfBounds(int x, int y) const;
+    bool isOutOfBounds(byte x, byte y) const;
 };
 
 class Bomb : public Entity {
 public:
     Bomb();
     Bomb& operator=(const Bomb& other);
-    bool timerRanOut() const { return (millis() - timePlaced) > timer; }
-    bool explode();
+    bool timerRanOut() const { return (millis() - timePlaced) > bombTimer; }
+    bool exploded();
 private:
-    unsigned long timer = 3000;
     unsigned long timePlaced;
-    int explosionRadius = 2;
-    unsigned long explosionStart = 0;
-    int animationDuration = 500;
-    
+    unsigned long explosionStart = 0;    
 };
+
+void blinkEntity(unsigned long &lastBlink, unsigned long blinkInterval, bool &visible, byte x, byte y);

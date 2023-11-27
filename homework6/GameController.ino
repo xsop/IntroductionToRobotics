@@ -7,14 +7,14 @@ Controller::Controller() {
 }
 
 void Controller::update() {
-    readJoystickValues();
+    storeJoystickValues();
     if(isNextMoveAvailable()) {
         movePlayer();
     }
     handleButton();
 }
 
-void Controller::readJoystickValues(){
+void Controller::storeJoystickValues(){
     joystickValueX = analogRead(joystickPinX);
     joystickValueY = analogRead(joystickPinY);
 }
@@ -32,7 +32,7 @@ void Controller::handleButton(){
     lastJoystickButtonState = getJoystickButtonRead();
 }
 
-int Controller::getDirection(){
+int Controller::getDirection() const{
     if (getJoystickValueY() < joystickMinCenterThreshold) {
         return UP_DIRECTION;
     } else if (getJoystickValueY() > joystickMaxCenterThreshold) {
@@ -69,7 +69,7 @@ void Controller::movePlayer(){
     }
 }
 
-bool Controller::isNextMoveAvailable(){
+bool Controller::isNextMoveAvailable() const{
     if(millis() - lastMove > moveDelay) {
         return true;
     }

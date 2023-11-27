@@ -19,26 +19,21 @@ class Controller {
         int getJoystickValueY() const { return joystickValueY; }
         byte getJoystickButtonRead() const { return digitalRead(joystickPinSwitch); }
 
-        void readJoystickValues();
+        int getDirection() const;
+
+        void storeJoystickValues();
         void handleButton();
-        int getDirection();
+
         void movePlayer();
-        bool isNextMoveAvailable();
+
+        bool isNextMoveAvailable() const;
+        
         
     private:
-        const int joystickPinX = A0;
-        const int joystickPinY = A1;
-        const int joystickPinSwitch = 2;
-        const int joystickMinCenterThreshold = 300;
-        const int joystickMaxCenterThreshold = 700;
-
         int joystickValueX = 0;
         int joystickValueY = 0;
         byte lastJoystickButtonState = 0;
 
         unsigned long lastMove = 0;
         unsigned long lastDebounceTime = 0;
-        
-        const int moveDelay = 100;
-        const int debounceDelay = 50;
 };
