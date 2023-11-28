@@ -165,5 +165,4 @@ You die by touching the explosion.
 
 **Code**: [homework6](homework6/homework6.ino)
 
-**Video**: [Link](https://www.youtube.com/watch?v=tWVN4f-HtDU)\
-(the matrix is too bright for my camera so the whole video is underexposed, but the matrix is clear)
+**Video**: [Link](https://www.youtube.com/watch?v=hjoa7RpFMVM)
