@@ -166,3 +166,36 @@ You die by touching the explosion.
 **Code**: [homework6](homework6/homework6.ino)
 
 **Video**: [Link](https://www.youtube.com/watch?v=hjoa7RpFMVM)
+
+## Homework 7
+
+Added a menu system to the Bomberman game.\
+Using a joystick, you can navigate through the menu and select the desired option.\
+The menu is displayed on a 2x16 LCD Display.\
+Also added dots left on the screen while playing.
+
+
+<details>
+	<summary>Components used:</summary>
+	<ul>
+		<li>Arduino Uno</li>
+		<li>Breadboard</li>
+		<li>8x8 LED Matrix</li>
+		<li>Joystick</li>
+		<li>MAX7219 Driver</li>
+		<li>10k Ohm Resistor</li>
+		<li>C104 Capacitor</li>
+		<li>C4 10μF Capacitor</li>
+		<li>LCD Display</li>
+		<li>wires</li>
+	</ul>
+</details>
+
+<details>
+	<summary>Image</summary>
+	<img src="homework7/1.jpeg" width="350"> <br>
+</details>
+
+**Code**: [homework7](homework7/homework7.ino)
+
+**Video**: [Link](https://youtu.be/6_1slfpg0L0)
